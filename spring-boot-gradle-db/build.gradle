@@ -1,0 +1,90 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE")
+    }
+
+}
+
+
+plugins {
+    id 'au.com.dius.pact' version "3.2.4"
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.1'
+}
+
+
+
+
+String serviceVersion = '0.0.1-SNAPSHOT'
+String serviceName = 'spring-boot-gradle'
+String repoName = "emp2/app/$serviceName"
+String registry = "449585361954.dkr.ecr.ap-southeast-1.amazonaws.com/$repoName:$serviceVersion"
+String pactVersion = "1.0.1"
+
+jar {
+    baseName = serviceName
+    version =  serviceVersion
+}
+
+pact {
+
+    publish {
+        pactBrokerUrl = 'http://54.169.255.226'
+        version = pactVersion
+    }
+
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+
+
+dependencyManagement {
+	imports {
+    	mavenBom 'org.springframework.cloud:spring-cloud-dependencies:Camden.SR1'
+  	}
+}
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+    compile 'org.springframework.boot:spring-boot-starter-jdbc'
+    compile 'commons-lang:commons-lang:2.4'
+    compile 'mysql:mysql-connector-java'
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'au.com.dius:pact-jvm-provider-junit_2.11:3.3.2'
+}
+
+
+test {
+    systemProperties['pact.rootDir'] = "$buildDir/pacts"
+    useJUnit {
+        if (project.findProperty('EXCLUDE_INTEGRATION_TESTS')=='Y') {
+
+           excludeCategories 'com.hktdc.test.categories.IntegrationTest'
+        }
+
+        if (project.findProperty('INCLUDE_INTEGRATION_TESTS_ONLY')=='Y') {
+
+           includeCategories 'com.hktdc.test.categories.IntegrationTest'
+        }
+    }
+}
+

@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:mysql://sbhui.cmx0y4eteiyn.ap-southeast-1.rds.amazonaws.com:3306/user
+    username: sbhui
+    password: 2w4r6y8i

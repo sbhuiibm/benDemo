@@ -1,0 +1,30 @@
+{
+    "provider": {
+        "name": "Provider1"
+    },
+    "consumer": {
+        "name": "Consumer1"
+    },
+    "interactions": [
+        {
+            "description": "uponReceiving",
+            "request": {
+                "method": "GET",
+                "path": "/benTest/greetings2"
+            },
+            "response": {
+                "status": 200,
+                "body": "Hello Ben!"
+            },
+            "providerState": "Given a state"
+        }
+    ],
+    "metadata": {
+        "pact-specification": {
+            "version": "2.0.0"
+        },
+        "pact-jvm": {
+            "version": "3.3.2"
+        }
+    }
+}
