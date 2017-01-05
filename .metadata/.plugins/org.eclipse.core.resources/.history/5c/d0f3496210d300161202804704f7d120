@@ -1,4 +1,4 @@
 spring.application.name=appconfigben
 # N.B. this is the default:
 spring.cloud.config.uri=http://publicalb-2041584895.ap-southeast-1.elb.amazonaws.com:80
-spring.cloud.config.failFast=true 
+spring.cloud.config.discovery.enabled=true 
