@@ -39,7 +39,7 @@ jar {
 pact {
 
     publish {
-        pactBrokerUrl = 'http://54.169.255.226'
+        pactBrokerUrl = 'http://ec2-54-255-167-96.ap-southeast-1.compute.amazonaws.com:8009/ui/relationships'
         version = pactVersion
     }
 
@@ -69,7 +69,17 @@ dependencies {
     compile 'commons-lang:commons-lang:2.4'
     compile 'mysql:mysql-connector-java'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'au.com.dius:pact-jvm-consumer-junit_2.11:3.3.2'
     testCompile 'au.com.dius:pact-jvm-provider-junit_2.11:3.3.2'
+}
+
+sourceSets {
+    test {
+        java {
+
+            srcDirs = ['src/test/java', 'src/test/pact']
+        }
+    }
 }
 
 

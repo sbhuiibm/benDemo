@@ -3,52 +3,83 @@ package com.deom.consumer1;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactProviderRule;
 import au.com.dius.pact.consumer.PactVerification;
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.PactFragment;
-import com.amazonaws.util.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.fluent.Request;
-import org.junit.Rule;
-import org.junit.Test;
+import au.com.dius.pact.provider.junit.loader.PactBroker;
+
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.fluent.Request;
+import org.apache.http.entity.ContentType;
+import org.junit.Rule;
+import org.junit.Test;
 
-/**
- * @author Mike Chung
- */
+import com.amazonaws.util.IOUtils;
+
+@PactBroker(host="ec2-54-255-167-96.ap-southeast-1.compute.amazonaws.com/", port = "8009")
 public class Consumer1Test {
 
-
     @Rule
-    public PactProviderRule provider1 = new PactProviderRule("Provider1", this);
-
-    @Pact(provider="Provider1", consumer = "Consumer1")
+    public PactProviderRule greetingProvider = new PactProviderRule("GreetingProvider", this);
+	
+    @Pact(provider="GreetingProvider" , consumer = "GreetingConsumer")
     public PactFragment createPactFragment(PactDslWithProvider builder) {
 
-        return builder.given("Given a state")
+        return builder.given("Get memrber name without member id")
                 .uponReceiving("uponReceiving")
-                .path("/benTest/greetings2")
+                .path("/benTest/greetings")
                 .method("GET")
                 .willRespondWith()
                 .status(200)
+                .body("Hello World!")
+                .toFragment();                
+    }
+    
+    
+    @Pact(provider="GreetingProvider" , consumer = "GreetingConsumer")
+    public PactFragment createPactFragment2(PactDslWithProvider builder) {
+
+        return builder.given("Get memrber name with member id")
+                .uponReceiving("uponReceiving")
+                .path("/benTest/greetings2")
+                .method("GET")
+                .query("userid=1")
+                .willRespondWith()
+                .status(200)
                 .body("Hello Ben!")
-                .toFragment();
+                .toFragment();                
     }
 
+    
     @Test
-    @PactVerification({"Provider1", "Given a state"})
+    @PactVerification(value = {"GreetingProvider", "Get memrber name without member id"}, fragment ="createPactFragment")
     public void shouldReturnSuccess() throws IOException {
-        Request request = Request.Get(this.provider1.getConfig().url() + "/benTest/greetings2");
+    	
+        Request request = Request.Get(this.greetingProvider.getConfig().url() + "/benTest/greetings");
+        HttpResponse httpResponse = request.execute().returnResponse();
+        assertEquals(200, httpResponse.getStatusLine().getStatusCode());
+        InputStream content = httpResponse.getEntity().getContent();
+        assertEquals("Hello World!", IOUtils.toString(content));
+        
+
+    }
+    
+    
+    @Test
+    @PactVerification(value = {"GreetingProvider", "Get memrber name with member id"}, fragment ="createPactFragment2")
+    public void shouldReturnMemberSuccess() throws IOException {
+    	
+        Request request = Request.Get(this.greetingProvider.getConfig().url() + "/benTest/greetings2?userid=1");
         HttpResponse httpResponse = request.execute().returnResponse();
         assertEquals(200, httpResponse.getStatusLine().getStatusCode());
         InputStream content = httpResponse.getEntity().getContent();
         assertEquals("Hello Ben!", IOUtils.toString(content));
+        
+
     }
 
 }

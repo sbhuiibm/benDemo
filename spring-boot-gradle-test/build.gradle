@@ -39,7 +39,7 @@ jar {
 pact {
 
     publish {
-        pactBrokerUrl = 'http://54.169.255.226'
+        pactBrokerUrl = 'http://ec2-54-255-167-96.ap-southeast-1.compute.amazonaws.com:8009/ui/relationships'
         version = pactVersion
     }
 
@@ -63,6 +63,7 @@ dependencyManagement {
 }
 
 dependencies {
+    compile 'org.springframework.cloud:spring-cloud-starter-config'
     compile('org.springframework.cloud:spring-cloud-starter-config')
     compile('org.springframework.boot:spring-boot-starter-actuator')
 	compile 'org.springframework.boot:spring-boot-starter-web'
@@ -70,6 +71,7 @@ dependencies {
     runtime('mysql:mysql-connector-java')
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'au.com.dius:pact-jvm-consumer-junit_2.11:3.3.2'
+    testCompile 'au.com.dius:pact-jvm-provider-junit_2.11:3.3.2'
 }
 
 sourceSets {
@@ -81,9 +83,21 @@ sourceSets {
     }
 }
 
+
 test {
     systemProperties['pact.rootDir'] = "$buildDir/pacts"
+    useJUnit {
+        if (project.findProperty('EXCLUDE_INTEGRATION_TESTS')=='Y') {
+
+           excludeCategories 'com.hktdc.test.categories.IntegrationTest'
+        }
+
+        if (project.findProperty('INCLUDE_INTEGRATION_TESTS_ONLY')=='Y') {
+
+           includeCategories 'com.hktdc.test.categories.IntegrationTest'
+        }
+    }
 }
 
-test.onlyIf { project.findProperty('INCLUDE_INTEGRATION_TESTS_ONLY') != 'Y' }
-
+build.dependsOn pactPublish
+pactPublish.mustRunAfter test
